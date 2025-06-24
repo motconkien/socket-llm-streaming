@@ -1,0 +1,48 @@
+#define version
+version: "3"
+
+#define services: spark-master, spark-worker
+services: 
+  spark-master:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    container_name: spark-master
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    volumes:
+      - ./config:/opt/bitnami/spark/config
+      - ./jobs:/opt/bitnami/spark/jobs
+      - ./datasets:/opt/bitnami/spark/datasets
+      - ./utils:/opt/bitnami/spark/utils
+      - ./models:/opt/bitnami/spark/models
+      - ./requirements.txt:/opt/bitnami/spark/requirements.txt
+
+    ports:
+      - "8080:8080"  # Web UI
+      - "7077:7077"  # Spark master port
+  
+  spark-worker: 
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    container_name: spark-worker
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    volumes:
+      - ./config:/opt/bitnami/spark/config
+      - ./jobs:/opt/bitnami/spark/jobs
+      - ./datasets:/opt/bitnami/spark/datasets
+      - ./utils:/opt/bitnami/spark/utils
+      - ./models:/opt/bitnami/spark/models
+      - ./requirements.txt:/opt/bitnami/spark/requirements.txt
+
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_MASTER_URL: spark://spark-master:7077
+
+
+
+
