@@ -38,7 +38,7 @@ src/
 ├── Dockerfile.spark
 ├── requirements.txt
 ├── .gitignore
-└── readme.md
+└── README.md
 
 ```
 
